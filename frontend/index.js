@@ -33,7 +33,7 @@ function renderAuthenticated() {
   content.innerHTML = `
     <button id="whoamiButton">Who am I?</button>
     <button id="logoutButton">Logout</button>
-    ${principal ? `<p>Principal ID: ${principal}</p>` : ''}
+    ${principal ? `<p>Authenticated Principal ID: ${principal}</p>` : ''}
   `;
   document.getElementById('whoamiButton').addEventListener('click', whoami);
   document.getElementById('logoutButton').addEventListener('click', logout);
@@ -84,7 +84,7 @@ async function whoami() {
       content.innerHTML = `
         <button id="loginButton">Login</button>
         <button id="whoamiButton">Who am I?</button>
-        <p>Anonymous Principal ID: ${principal}</p>
+        <p>Unauthenticated Principal ID: ${principal}</p>
       `;
       document.getElementById('loginButton').addEventListener('click', login);
       document.getElementById('whoamiButton').addEventListener('click', whoami);
