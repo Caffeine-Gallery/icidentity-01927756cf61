@@ -57,15 +57,14 @@ async function logout() {
 }
 
 async function whoami() {
-  const isAuthenticated = await authClient.isAuthenticated();
   const agent = new HttpAgent({
-    identity: isAuthenticated ? authClient.getIdentity() : undefined,
+    identity: authClient.getIdentity(),
   });
   
   const actor = Actor.createActor(
     ({ IDL }) => {
       return IDL.Service({
-        'whoami': IDL.Func([], [IDL.Principal], ['query'])
+        'whoami': IDL.Func([], [IDL.Principal], [])
       });
     },
     {
@@ -74,19 +73,24 @@ async function whoami() {
     }
   );
   
-  const result = await actor.whoami();
-  principal = result.toString();
-  
-  if (isAuthenticated) {
-    renderAuthenticated();
-  } else {
-    content.innerHTML = `
-      <button id="loginButton">Login</button>
-      <button id="whoamiButton">Who am I?</button>
-      <p>Anonymous Principal ID: ${principal}</p>
-    `;
-    document.getElementById('loginButton').addEventListener('click', login);
-    document.getElementById('whoamiButton').addEventListener('click', whoami);
+  try {
+    const result = await actor.whoami();
+    principal = result.toString();
+    
+    if (await authClient.isAuthenticated()) {
+      renderAuthenticated();
+    } else {
+      content.innerHTML = `
+        <button id="loginButton">Login</button>
+        <button id="whoamiButton">Who am I?</button>
+        <p>Anonymous Principal ID: ${principal}</p>
+      `;
+      document.getElementById('loginButton').addEventListener('click', login);
+      document.getElementById('whoamiButton').addEventListener('click', whoami);
+    }
+  } catch (error) {
+    console.error("Error calling whoami:", error);
+    content.innerHTML += `<p>Error: ${error.message}</p>`;
   }
 }
 
