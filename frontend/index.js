@@ -22,8 +22,10 @@ async function init() {
 function renderLogin() {
   content.innerHTML = `
     <button id="loginButton">Login</button>
+    <button id="whoamiButton">Who am I?</button>
   `;
   document.getElementById('loginButton').addEventListener('click', login);
+  document.getElementById('whoamiButton').addEventListener('click', whoami);
 }
 
 function renderAuthenticated() {
@@ -54,6 +56,11 @@ async function logout() {
 }
 
 async function whoami() {
+  if (!authClient.isAuthenticated()) {
+    alert("You are not logged in. Please log in to see your principal ID.");
+    return;
+  }
+
   const agent = new HttpAgent({ identity: authClient.getIdentity() });
   const actor = Actor.createActor(
     ({ IDL }) => {
