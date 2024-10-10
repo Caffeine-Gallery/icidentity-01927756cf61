@@ -7,6 +7,8 @@ const content = document.getElementById('content');
 let authClient;
 let principal;
 
+const DEFAULT_UNAUTHENTICATED_PRINCIPAL = '2vxsx-fae';
+
 async function init() {
   authClient = await AuthClient.create();
   const isAuthenticated = await authClient.isAuthenticated();
@@ -84,7 +86,7 @@ async function whoami() {
       content.innerHTML = `
         <button id="loginButton">Login</button>
         <button id="whoamiButton">Who am I?</button>
-        <p>Unauthenticated Principal ID: ${principal}</p>
+        <p>Unauthenticated Principal ID: ${principal === DEFAULT_UNAUTHENTICATED_PRINCIPAL ? DEFAULT_UNAUTHENTICATED_PRINCIPAL : 'Unknown'}</p>
       `;
       document.getElementById('loginButton').addEventListener('click', login);
       document.getElementById('whoamiButton').addEventListener('click', whoami);
