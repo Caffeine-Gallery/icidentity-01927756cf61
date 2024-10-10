@@ -1,5 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { Actor, HttpAgent } from '@dfinity/agent';
+import { Principal } from '@dfinity/principal';
 
 const content = document.getElementById('content');
 
@@ -56,12 +57,11 @@ async function logout() {
 }
 
 async function whoami() {
-  if (!authClient.isAuthenticated()) {
-    alert("You are not logged in. Please log in to see your principal ID.");
-    return;
-  }
-
-  const agent = new HttpAgent({ identity: authClient.getIdentity() });
+  const isAuthenticated = await authClient.isAuthenticated();
+  const agent = new HttpAgent({
+    identity: isAuthenticated ? authClient.getIdentity() : undefined,
+  });
+  
   const actor = Actor.createActor(
     ({ IDL }) => {
       return IDL.Service({
@@ -73,9 +73,21 @@ async function whoami() {
       canisterId: process.env.BACKEND_CANISTER_ID,
     }
   );
+  
   const result = await actor.whoami();
   principal = result.toString();
-  renderAuthenticated();
+  
+  if (isAuthenticated) {
+    renderAuthenticated();
+  } else {
+    content.innerHTML = `
+      <button id="loginButton">Login</button>
+      <button id="whoamiButton">Who am I?</button>
+      <p>Anonymous Principal ID: ${principal}</p>
+    `;
+    document.getElementById('loginButton').addEventListener('click', login);
+    document.getElementById('whoamiButton').addEventListener('click', whoami);
+  }
 }
 
 init();
