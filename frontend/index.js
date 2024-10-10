@@ -7,8 +7,6 @@ const content = document.getElementById('content');
 let authClient;
 let principal;
 
-const DEFAULT_UNAUTHENTICATED_PRINCIPAL = '2vxsx-fae';
-
 async function init() {
   authClient = await AuthClient.create();
   const isAuthenticated = await authClient.isAuthenticated();
@@ -25,10 +23,9 @@ async function init() {
 function renderLogin() {
   content.innerHTML = `
     <button id="loginButton">Login</button>
-    <button id="whoamiButton">Who am I?</button>
+    <p>Login with Internet Identity to view your user principal</p>
   `;
   document.getElementById('loginButton').addEventListener('click', login);
-  document.getElementById('whoamiButton').addEventListener('click', whoami);
 }
 
 function renderAuthenticated() {
@@ -60,8 +57,13 @@ async function logout() {
 
 async function whoami() {
   const isAuthenticated = await authClient.isAuthenticated();
+  if (!isAuthenticated) {
+    console.error("User is not authenticated");
+    return;
+  }
+
   const agent = new HttpAgent({
-    identity: isAuthenticated ? authClient.getIdentity() : undefined,
+    identity: authClient.getIdentity(),
   });
   
   const actor = Actor.createActor(
@@ -79,18 +81,7 @@ async function whoami() {
   try {
     const result = await actor.whoami();
     principal = result.toString();
-    
-    if (isAuthenticated) {
-      renderAuthenticated();
-    } else {
-      content.innerHTML = `
-        <button id="loginButton">Login</button>
-        <button id="whoamiButton">Who am I?</button>
-        <p>Unauthenticated Principal ID: ${principal === DEFAULT_UNAUTHENTICATED_PRINCIPAL ? DEFAULT_UNAUTHENTICATED_PRINCIPAL : 'Unknown'}</p>
-      `;
-      document.getElementById('loginButton').addEventListener('click', login);
-      document.getElementById('whoamiButton').addEventListener('click', whoami);
-    }
+    renderAuthenticated();
   } catch (error) {
     console.error("Error calling whoami:", error);
     content.innerHTML += `<p>Error: ${error.message}</p>`;
