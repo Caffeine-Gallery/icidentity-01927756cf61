@@ -3,6 +3,7 @@ import { Actor, HttpAgent } from '@dfinity/agent';
 import { Principal } from '@dfinity/principal';
 
 const content = document.getElementById('content');
+const themeToggle = document.getElementById('themeToggle');
 
 let authClient;
 let principal;
@@ -18,6 +19,11 @@ async function init() {
   } else {
     renderLogin();
   }
+
+  // Initialize theme
+  const savedTheme = localStorage.getItem('theme') || 'light';
+  document.body.classList.add(savedTheme);
+  updateThemeToggleText();
 }
 
 function renderLogin() {
@@ -87,5 +93,23 @@ async function whoami() {
     content.innerHTML += `<p>Error: ${error.message}</p>`;
   }
 }
+
+function toggleTheme() {
+  const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+  const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+  
+  document.body.classList.remove(currentTheme);
+  document.body.classList.add(newTheme);
+  
+  localStorage.setItem('theme', newTheme);
+  updateThemeToggleText();
+}
+
+function updateThemeToggleText() {
+  const currentTheme = document.body.classList.contains('dark') ? 'dark' : 'light';
+  themeToggle.textContent = `Switch to ${currentTheme === 'dark' ? 'Light' : 'Dark'} Mode`;
+}
+
+themeToggle.addEventListener('click', toggleTheme);
 
 init();
