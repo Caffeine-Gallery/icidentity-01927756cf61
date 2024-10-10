@@ -57,14 +57,15 @@ async function logout() {
 }
 
 async function whoami() {
+  const isAuthenticated = await authClient.isAuthenticated();
   const agent = new HttpAgent({
-    identity: authClient.getIdentity(),
+    identity: isAuthenticated ? authClient.getIdentity() : undefined,
   });
   
   const actor = Actor.createActor(
     ({ IDL }) => {
       return IDL.Service({
-        'whoami': IDL.Func([], [IDL.Principal], [])
+        'whoami': IDL.Func([], [IDL.Principal], ['query'])
       });
     },
     {
@@ -77,7 +78,7 @@ async function whoami() {
     const result = await actor.whoami();
     principal = result.toString();
     
-    if (await authClient.isAuthenticated()) {
+    if (isAuthenticated) {
       renderAuthenticated();
     } else {
       content.innerHTML = `
